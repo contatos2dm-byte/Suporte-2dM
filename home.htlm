@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bot 2dM - Rede Coletiva de Sustentabilidade</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 650px;
+    margin: 30px auto;
+    background: #f0f8f5;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  #chat {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px;
+    background: white;
+    min-height: 200px;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+  }
+  .choice-btn {
+    display: block;
+    margin: 8px 0;
+    padding: 10px;
+    width: 100%;
+    font-size: 1em;
+    border: none;
+    border-radius: 4px;
+    background: #2e8b57;
+    color: white;
+    cursor: pointer;
+    text-align: left;
+  }
+  .choice-btn:hover {
+    background: #276846;
+  }
+  form {
+    margin-top: 10px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+  input[type=text], input[type=email], input[type=tel] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  input[type=submit], button#cancel-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: #2e8b57;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+  }
+  input[type=submit]:hover, button#cancel-btn:hover {
+    background: #276846;
+  }
+</style>
+</head>
+<body>
+
+<h2>Bot 2dM - Rede Coletiva de Sustentabilidade</h2>
+
+<div id="chat"></div>
+<div id="choices"></div>
+
+<script>
+const botData = {
+  start_node: "menu_principal",
+  nodes: {
+    menu_principal: {
+      message: "Olá! Bem-vindo(a) à Rede Coletiva de Sustentabilidade 2dM! Como posso ajudar você hoje?",
+      choices: [
+        {label: "Atendimentos & Consultas", next_node: "atendimentos_consultas"},
+        {label: "Plataformas & Comunidade", next_node: "plataformas_comunidade"},
+        {label: "Loja & Parcerias", next_node: "loja_parcerias"},
+        {label: "Projetos & Colaborações", next_node: "projetos_colaboracoes"},
+        {label: "Falar com atendente", next_node: "falar_atendente"},
+        {label: "Consultoria Estratégica & Pacotes", next_node: "consultoria_estrategica"},
+        {label: "Moeda Social Conex & Rede", next_node: "moeda_social_conex"}
+      ]
+    },
+    consultoria_estrategica: {
+      message: "Consultoria Estratégica 2dM:\n\nValor: R$200/hora\nPacote: 4 reuniões + 1 hora extra grátis após 30 dias do último encontro\nInclui:\n- Vídeo gravado da consultoria\n- Informações sobre Coletivos\n- Possibilidade de adesão gratuita ao Coletivo Teias pelos 2 primeiros meses\n- Intermediação de contatos estratégicos\n- Mapeamento inicial de necessidades\n- Relatório com eixos de criação do projeto\n\nDeseja agendar sua consultoria?",
+      choices: [
+        {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
+        {label: "Não, quero mais informações", next_node: "falar_atendente"},
+        {label: "Voltar ao menu principal", next_node: "menu_principal"}
+      ]
+    },
+    moeda_social_conex: {
+      message: "Moeda Social Conex (CNX):\n\nCNX facilita interações e acesso a serviços na plataforma 2dM.\n1 CNX = 1 BRL\n\nPacotes de Créditos:\n- Starter: 10 CNX (R$10)\n- Conexão: 25 CNX + 5 bônus\n- Rede: 50 CNX + 15 bônus\n- Parceiro: 100 CNX + 40 bônus\n\nServiços em CNX:\n- Acesso 7 dias: 10 CNX\n- Contato Simples: 15 CNX\n- Descobrir 3 conexões: 30 CNX\n- Descobrir 5 conexões: 50 CNX\n- Mapa da Rede: 60 CNX\n- Marcar Reunião: 80 CNX\n- Conversa Direcionada 30min: 90 CNX\n- Projeto Conjunto: 200 CNX\n\nDeseja se cadastrar e usar seus créditos?",
+      choices: [
+        {label: "Sim, quero me cadastrar", next_node: "formulario_afiliação"},
+        {label: "Não, voltar ao menu principal", next_node: "menu_principal"}
+      ]
+    },
+    atendimentos_consultas: {
+      message: "Escolha o serviço desejado:\n\na) Agendar Consulta Inicial\nb) Monitoria Afetiva\nc) Consulta Música, Poesia e Escrita\nd) Consultoria Relatórios & Monitoria Digital\ne) Voltar ao Menu Principal",
+      choices: [
+        {label: "Agendar Consulta Inicial", next_node: "agenda_consulta"},
+        {label: "Monitoria Afetiva", next_node: "monitoria_afetiva"},
+        {label: "Consulta Música, Poesia e Escrita", next_node: "consulta_musica"},
+        {label: "Consultoria Relatórios & Monitoria Digital", next_node: "consultoria_relatorios"},
+        {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
+      ]
+    },
+    agenda_consulta: {
+      message: "Oferecemos consultoria estratégica para conectar você a parcerias, projetos e coletivos. Valor: R$200/hora.\nQuer agendar sua primeira consulta?",
+      choices: [
+        {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
+        {label: "Não, quero a proposta detalhada", next_node: "enviar_proposta"},
+        {label: "Voltar ao menu Consultas", next_node: "atendimentos_consultas"}
+      ]
+    },
+    monitoria_afetiva: {
+      message: "A Monitoria Afetiva oferece acompanhamento individual ou em grupo para fortalecer conexões emocionais e criativas.\nQuer agendar uma sessão?",
+      choices: [
+        {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
+        {label: "Não, voltar ao menu Consultas", next_node: "atendimentos_consultas"}
+      ]
+    },
+    consulta_musica: {
+      message: "Consulta 2dM Música, Poesia e Escrita: orientação especializada para suas criações.\nQuer agendar uma consulta?",
+      choices: [
+        {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
+        {label: "Não, voltar ao menu Consultas", next_node: "atendimentos_consultas"}
+      ]
+    },
+    consultoria_relatorios: {
+      message: "Consultoria Relatórios & Monitoria Digital: ajuda na elaboração de editais, artigos e monitoria de conteúdos digitais.\nQuer agendar uma consultoria?",
+      choices: [
+        {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
+        {label: "Não, voltar ao menu Consultas", next_node: "atendimentos_consultas"}
+      ]
+    },
+    plataformas_comunidade: {
+      message: "Escolha o que deseja acessar:\n\na) Acessar 2dM Match\nb) Descobrir Rede Sustentável 2dM\nc) Conhecer Projeto TEIAS\nd) Voltar ao Menu Principal",
+      choices: [
+        {label: "Acessar 2dM Match", next_node: "acessar_match"},
+        {label: "Descobrir Rede Sustentável 2dM", next_node: "descobrir_rede"},
+        {label: "Conhecer Projeto TEIAS", next_node: "conhecer_teias"},
+        {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
+      ]
+    },
+    acessar_match: {
+      message: "Aqui está o link para acessar o 2dM Match: [link].\nQuer ajuda para usar a plataforma?",
+      choices: [
+        {label: "Sim, quero ajuda", next_node: "falar_atendente"},
+        {label: "Não, voltar ao menu Plataformas", next_node: "plataformas_comunidade"}
+      ]
+    },
+    descobrir_rede: {
+      message: "A Rede Sustentável 2dM conecta pessoas e projetos em prol da sustentabilidade.\nQuer se cadastrar como afiliado?",
+      choices: [
+        {label: "Sim, quero me cadastrar", next_node: "formulario_afiliação"},
+        {label: "Não, voltar ao menu Plataformas", next_node: "plataformas_comunidade"}
+      ]
+    },
+    conhecer_teias: {
+      message: "O Projeto TEIAS fortalece conexões e colaboratividades na rede 2dM.\nQuer saber como participar?",
+      choices: [
+        {label: "Sim, quero saber mais", next_node: "falar_atendente"},
+        {label: "Não, voltar ao menu Plataformas", next_node: "plataformas_comunidade"}
+      ]
+    },
+    loja_parcerias: {
+      message: "O que deseja fazer?\n\na) Acessar 2dM Loja\nb) Ser Patrocinador ou Afiliado 2dM\nc) Voltar ao Menu Principal",
+      choices: [
+        {label: "Acessar 2dM Loja", next_node: "acessar_loja"},
+        {label: "Ser Patrocinador ou Afiliado", next_node: "ser_afilado"},
+        {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
+      ]
+    },
+    acessar_loja: {
+      message: "Aqui está o link para acessar a 2dM Loja: [link].\nQuer ajuda para comprar?",
+      choices: [
+        {label: "Sim, quero ajuda", next_node: "falar_atendente"},
+        {label: "Não, voltar ao menu Loja", next_node: "loja_parcerias"}
+      ]
+    },
+    ser_afilado: {
+      message: "Ser Patrocinador ou Afiliado da 2dM traz benefícios.\nQuer iniciar seu cadastro?",
+      choices: [
+        {label: "Sim, quero me cadastrar", next_node: "formulario_afiliação"},
+        {label: "Não, voltar ao menu Loja", next_node: "loja_parcerias"}
+      ]
+    },
+    projetos_colaboracoes: {
+      message: "Escolha o que deseja:\n\na) Projetos Sustentabilidade/Acadêmicos\nb) Conversa 2dM Match – Novo Projeto\nc) Colaborar na Wiki 2dM\nd) Voltar ao Menu Principal",
+      choices: [
+        {label: "Projetos Sustentabilidade ou Acadêmicos", next_node: "projetos_sustentabilidade"},
+        {label: "Conversa 2dM Match – Novo Projeto", next_node: "conversa_match"},
+        {label: "Colaborar na Wiki 2dM", next_node: "colaborar_wiki"},
+        {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
+      ]
+    },
+    projetos_sustentabilidade: {
+      message: "Temos projetos ativos nas áreas de sustentabilidade e acadêmicos.\nQuer participar?",
+      choices: [
+        {label: "Sim, quero participar", next_node: "falar_atendente"},
+        {label: "Não, voltar ao menu Projetos", next_node: "projetos_colaboracoes"}
+      ]
+    },
+    conversa_match: {
+      message: "A conversa 2dM Match é para discutir novos projetos e parcerias.\nQuer agendar uma conversa?",
+      choices: [
+        {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
+        {label: "Não, voltar ao menu Projetos", next_node: "projetos_colaboracoes"}
+      ]
+    },
+    colaborar_wiki: {
+      message: "A Wiki 2dM é um espaço colaborativo para compartilhar conhecimento.\nQuer se cadastrar para colaborar?",
+      choices: [
+        {label: "Sim, quero colaborar", next_node: "formulario_afiliação"},
+        {label: "Não, voltar ao menu Projetos", next_node: "projetos_colaboracoes"}
+      ]
+    },
+    coletar_dados_contato: {
+      message: "Por favor, informe seu nome e e-mail para que possamos entrar em contato e agendar o serviço.",
+      choices: []
+    },
+    enviar_proposta: {
+      message: "Vamos enviar a proposta detalhada para seu e-mail. Por favor, informe seu e-mail.",
+      choices: []
+    },
+    formulario_afiliação: {
+      message: "Para se cadastrar, por favor, preencha o formulário no link: [link para formulário].",
+      choices: [
+        {label: "Voltar ao menu principal", next_node: "menu_principal"}
+      ]
+    },
+    falar_atendente: {
+      message: "Por favor, informe seu nome e telefone para que um atendente entre em contato em breve.",
+      choices: []
+    },
+    agradecimento: {
+      message: "Obrigado pelo contato! Entraremos em contato o mais breve possível. Digite 'menu' para retornar ao início.",
+      choices: [
+        {label: "Voltar ao menu principal", next_node: "menu_principal"}
+      ]
+    }
+  }
+};
+
+const chatEl = document.getElementById("chat");
+const choicesEl = document.getElementById("choices");
+
+let currentNode = botData.start_node;
+
+function showNode(nodeKey) {
+  currentNode = nodeKey;
+  const node = botData.nodes[nodeKey];
+  
+  // Limpa chat e choices
+  chatEl.textContent = node.message;
+  choicesEl.innerHTML = "";
+
+  if (node.choices && node.choices.length > 0) {
+    node.choices.forEach(choice => {
+      const btn = document.createElement("button");
+      btn.textContent = choice.label;
+      btn.className = "choice-btn";
+      btn.onclick = () => showNode(choice.next_node);
+      choicesEl.appendChild(btn);
+    });
+  } else {
+    // Se não tiver choices, mostra formulário simples
+    const form = document.createElement("form");
+    form.innerHTML = `
+      <label>Nome:</label>
+      <input type="text" required id="nome">
+      <label>Email:</label>
+      <input type="email" required id="email">
+      <input type="submit" value="Enviar">
+      <button type="button" id="cancel-btn">Cancelar</button>
+    `;
+    choicesEl.appendChild(form);
+    
+    form.onsubmit = e => {
+      e.preventDefault();
+      chatEl.textContent = "Obrigado pelo envio! Entraremos em contato em breve.";
+      choicesEl.innerHTML = `<button class="choice-btn" onclick="showNode('menu_principal')">Voltar ao menu principal</button>`;
+    };
+    
+    form.querySelector("#cancel-btn").onclick = () => showNode("menu_principal");
+  }
+}
+
+// Inicializa na primeira mensagem
+window.onload = () => showNode(currentNode);
+</script>
+
+</body>
+</html>
