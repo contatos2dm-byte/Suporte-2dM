@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bot 2dM - Rede Coletiva Dois de Muitos</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -21,6 +22,8 @@
     min-height: 200px;
     margin-bottom: 10px;
     white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
   }
   .choice-btn {
     display: block;
@@ -37,6 +40,16 @@
   }
   .choice-btn:hover {
     background: #276846;
+  }
+  .auto-suggestion {
+    background: #4CAF50;
+    border: 2px solid #45a049;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
   }
   form {
     margin-top: 10px;
@@ -66,16 +79,82 @@
   input[type=submit]:hover, button#cancel-btn:hover {
     background: #276846;
   }
+  .disclaimer {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+    font-size: 0.85em;
+    color: #856404;
+  }
+  .community-links {
+    background: #e8f5e8;
+    border: 1px solid #c3e6c3;
+    border-radius: 4px;
+    padding: 15px;
+    margin-top: 15px;
+  }
+  .community-links h4 {
+    margin-top: 0;
+    color: #2e8b57;
+  }
+  .community-links a {
+    color: #2e8b57;
+    text-decoration: none;
+    display: block;
+    margin: 5px 0;
+  }
+  .community-links a:hover {
+    text-decoration: underline;
+  }
+  .auto-message {
+    background: #e3f2fd;
+    border-left: 4px solid #2196F3;
+    padding: 10px;
+    margin: 10px 0;
+    font-style: italic;
+  }
+  .loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2e8b57;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 </style>
 </head>
 <body>
+
+<div class="disclaimer">
+  <strong>⚠️ Aviso:</strong> Este projeto encontra-se em etapa de teste, buscando financiadores. Ao navegar nas ferramentas você concorda em expor dados de contato, testar e fazer parte do circuito de teste. Não será de nossa responsabilidade qualquer informação vazada. Prossiga por sua conta e risco.
+</div>
 
 <h2>Bot 2dM - Rede Coletiva de Sustentabilidade</h2>
 
 <div id="chat"></div>
 <div id="choices"></div>
 
+<div class="community-links">
+  <h4>🌐 Links da Comunidade 2dM</h4>
+  <a href="https://clubfullstack.github.io/2dM/" target="_blank">🏠 Home Page 2dM</a>
+  <a href="https://clubfullstack.github.io/2dM_shop/" target="_blank">🛒 Apoie o Projeto</a>
+  <a href="https://www.amazon.com.br/dp/B0FK4DFD3X" target="_blank">📚 Livro Digital (Amazon)</a>
+  <a href="https://clubedeautores.com.br/livro/inicio-do-caminhar" target="_blank">📖 Livro Digital (Clube de Autores)</a>
+  <a href="https://loja.uiclap.com/titulo/ua101144" target="_blank">📘 Livro Digital (UiClap)</a>
+  <a href="https://calendar.app.google/rkTmWwuQbDMeLtGbA" target="_blank">📅 Agenda Tavares</a>
+</div>
+
 <script>
+// Inicializa EmailJS
+emailjs.init("YOUR_PUBLIC_KEY"); // Será substituído por uma chave pública real
+
 const botData = {
   start_node: "menu_principal",
   nodes: {
@@ -89,7 +168,8 @@ const botData = {
         {label: "Falar com atendente", next_node: "falar_atendente"},
         {label: "Consultoria Estratégica & Pacotes", next_node: "consultoria_estrategica"},
         {label: "Moeda Social Conex & Rede", next_node: "moeda_social_conex"}
-      ]
+      ],
+      auto_suggestions: ["atendimentos_consultas", "projetos_colaboracoes"]
     },
     consultoria_estrategica: {
       message: "Consultoria Estratégica 2dM:\n\nValor: R$200/hora\nPacote: 4 reuniões + 1 hora extra grátis após 30 dias do último encontro\nInclui:\n- Vídeo gravado da consultoria\n- Informações sobre Coletivos\n- Possibilidade de adesão gratuita ao Coletivo Teias pelos 2 primeiros meses\n- Intermediação de contatos estratégicos\n- Mapeamento inicial de necessidades\n- Relatório com eixos de criação do projeto\n\nDeseja agendar sua consultoria?",
@@ -97,14 +177,16 @@ const botData = {
         {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
         {label: "Não, quero mais informações", next_node: "falar_atendente"},
         {label: "Voltar ao menu principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     moeda_social_conex: {
       message: "Moeda Social Conex (CNX):\n\nCNX facilita interações e acesso a serviços na plataforma 2dM.\n1 CNX = 1 BRL\n\nPacotes de Créditos:\n- Starter: 10 CNX (R$10)\n- Conexão: 25 CNX + 5 bônus\n- Rede: 50 CNX + 15 bônus\n- Parceiro: 100 CNX + 40 bônus\n\nServiços em CNX:\n- Acesso 7 dias: 10 CNX\n- Contato Simples: 15 CNX\n- Descobrir 3 conexões: 30 CNX\n- Descobrir 5 conexões: 50 CNX\n- Mapa da Rede: 60 CNX\n- Marcar Reunião: 80 CNX\n- Conversa Direcionada 30min: 90 CNX\n- Projeto Conjunto: 200 CNX\n\nDeseja se cadastrar e usar seus créditos?",
       choices: [
         {label: "Sim, quero me cadastrar", next_node: "formulario_afiliação"},
         {label: "Não, voltar ao menu principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["formulario_afiliação"]
     },
     atendimentos_consultas: {
       message: "Escolha o serviço desejado:\n\na) Agendar Consulta Inicial\nb) Monitoria Afetiva\nc) Consulta Música, Poesia e Escrita\nd) Consultoria Relatórios & Monitoria Digital\ne) Voltar ao Menu Principal",
@@ -114,7 +196,8 @@ const botData = {
         {label: "Consulta Música, Poesia e Escrita", next_node: "consulta_musica"},
         {label: "Consultoria Relatórios & Monitoria Digital", next_node: "consultoria_relatorios"},
         {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["agenda_consulta"]
     },
     agenda_consulta: {
       message: "Oferecemos consultoria estratégica para conectar você a parcerias, projetos e coletivos. Valor: R$200/hora.\nQuer agendar sua primeira consulta?",
@@ -122,28 +205,32 @@ const botData = {
         {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
         {label: "Não, quero a proposta detalhada", next_node: "enviar_proposta"},
         {label: "Voltar ao menu Consultas", next_node: "atendimentos_consultas"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     monitoria_afetiva: {
       message: "A Monitoria Afetiva oferece acompanhamento individual ou em grupo para fortalecer conexões emocionais e criativas.\nQuer agendar uma sessão?",
       choices: [
         {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Consultas", next_node: "atendimentos_consultas"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     consulta_musica: {
       message: "Consulta 2dM Música, Poesia e Escrita: orientação especializada para suas criações.\nQuer agendar uma consulta?",
       choices: [
         {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Consultas", next_node: "atendimentos_consultas"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     consultoria_relatorios: {
       message: "Consultoria Relatórios & Monitoria Digital: ajuda na elaboração de editais, artigos e monitoria de conteúdos digitais.\nQuer agendar uma consultoria?",
       choices: [
         {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Consultas", next_node: "atendimentos_consultas"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     plataformas_comunidade: {
       message: "Escolha o que deseja acessar:\n\na) Acessar 2dM Match\nb) Descobrir Rede Sustentável 2dM\nc) Conhecer Projeto TEIAS\nd) Voltar ao Menu Principal",
@@ -152,28 +239,35 @@ const botData = {
         {label: "Descobrir Rede Sustentável 2dM", next_node: "descobrir_rede"},
         {label: "Conhecer Projeto TEIAS", next_node: "conhecer_teias"},
         {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["descobrir_rede", "conhecer_teias"]
     },
     acessar_match: {
-      message: "Aqui está o link para acessar o 2dM Match: [link].\nQuer ajuda para usar a plataforma?",
+      message: "Aqui está o link para acessar o 2dM Match: https://clubfullstack.github.io/2dM/\n\nQuer ajuda para usar a plataforma ou prefere agendar uma consulta para maximizar suas conexões?",
       choices: [
         {label: "Sim, quero ajuda", next_node: "falar_atendente"},
+        {label: "Agendar consulta para maximizar conexões", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Plataformas", next_node: "plataformas_comunidade"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     descobrir_rede: {
-      message: "A Rede Sustentável 2dM conecta pessoas e projetos em prol da sustentabilidade.\nQuer se cadastrar como afiliado?",
+      message: "A Rede Sustentável 2dM conecta pessoas e projetos em prol da sustentabilidade.\nQuer se cadastrar como afiliado e descobrir novas oportunidades de colaboração?",
       choices: [
         {label: "Sim, quero me cadastrar", next_node: "formulario_afiliação"},
+        {label: "Quero agendar consulta sobre a rede", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Plataformas", next_node: "plataformas_comunidade"}
-      ]
+      ],
+      auto_suggestions: ["formulario_afiliação", "coletar_dados_contato"]
     },
     conhecer_teias: {
-      message: "O Projeto TEIAS fortalece conexões e colaboratividades na rede 2dM.\nQuer saber como participar?",
+      message: "O Projeto TEIAS fortalece conexões e colaboratividades na rede 2dM.\nQuer saber como participar e colaborar ativamente?",
       choices: [
         {label: "Sim, quero saber mais", next_node: "falar_atendente"},
+        {label: "Quero agendar consulta sobre TEIAS", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Plataformas", next_node: "plataformas_comunidade"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     loja_parcerias: {
       message: "O que deseja fazer?\n\na) Acessar 2dM Loja\nb) Ser Patrocinador ou Afiliado 2dM\nc) Voltar ao Menu Principal",
@@ -181,21 +275,26 @@ const botData = {
         {label: "Acessar 2dM Loja", next_node: "acessar_loja"},
         {label: "Ser Patrocinador ou Afiliado", next_node: "ser_afilado"},
         {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["ser_afilado"]
     },
     acessar_loja: {
-      message: "Aqui está o link para acessar a 2dM Loja: [link].\nQuer ajuda para comprar?",
+      message: "Aqui está o link para acessar a 2dM Loja: https://clubfullstack.github.io/2dM_shop/\n\nQuer ajuda para comprar ou prefere uma consultoria sobre parcerias?",
       choices: [
         {label: "Sim, quero ajuda", next_node: "falar_atendente"},
+        {label: "Quero consultoria sobre parcerias", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Loja", next_node: "loja_parcerias"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     ser_afilado: {
-      message: "Ser Patrocinador ou Afiliado da 2dM traz benefícios.\nQuer iniciar seu cadastro?",
+      message: "Ser Patrocinador ou Afiliado da 2dM traz benefícios exclusivos e oportunidades de colaboração.\nQuer iniciar seu cadastro ou agendar uma consulta para entender melhor?",
       choices: [
         {label: "Sim, quero me cadastrar", next_node: "formulario_afiliação"},
+        {label: "Quero agendar consulta primeiro", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Loja", next_node: "loja_parcerias"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato", "formulario_afiliação"]
     },
     projetos_colaboracoes: {
       message: "Escolha o que deseja:\n\na) Projetos Sustentabilidade/Acadêmicos\nb) Conversa 2dM Match – Novo Projeto\nc) Colaborar na Wiki 2dM\nd) Voltar ao Menu Principal",
@@ -204,49 +303,57 @@ const botData = {
         {label: "Conversa 2dM Match – Novo Projeto", next_node: "conversa_match"},
         {label: "Colaborar na Wiki 2dM", next_node: "colaborar_wiki"},
         {label: "Voltar ao Menu Principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["projetos_sustentabilidade", "conversa_match"]
     },
     projetos_sustentabilidade: {
-      message: "Temos projetos ativos nas áreas de sustentabilidade e acadêmicos.\nQuer participar?",
+      message: "Temos projetos ativos nas áreas de sustentabilidade e acadêmicos. Colaborar conosco pode abrir novas oportunidades de rede e crescimento.\nQuer participar e descobrir como contribuir?",
       choices: [
         {label: "Sim, quero participar", next_node: "falar_atendente"},
+        {label: "Quero agendar consulta sobre projetos", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Projetos", next_node: "projetos_colaboracoes"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     conversa_match: {
-      message: "A conversa 2dM Match é para discutir novos projetos e parcerias.\nQuer agendar uma conversa?",
+      message: "A conversa 2dM Match é para discutir novos projetos e parcerias estratégicas.\nQuer agendar uma conversa para explorar oportunidades?",
       choices: [
         {label: "Sim, quero agendar", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Projetos", next_node: "projetos_colaboracoes"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     colaborar_wiki: {
-      message: "A Wiki 2dM é um espaço colaborativo para compartilhar conhecimento.\nQuer se cadastrar para colaborar?",
+      message: "A Wiki 2dM é um espaço colaborativo para compartilhar conhecimento e fortalecer a rede.\nQuer se cadastrar para colaborar e expandir suas conexões?",
       choices: [
         {label: "Sim, quero colaborar", next_node: "formulario_afiliação"},
+        {label: "Quero agendar consulta sobre colaboração", next_node: "coletar_dados_contato"},
         {label: "Não, voltar ao menu Projetos", next_node: "projetos_colaboracoes"}
-      ]
+      ],
+      auto_suggestions: ["formulario_afiliação", "coletar_dados_contato"]
     },
     coletar_dados_contato: {
-      message: "Por favor, informe seu nome e e-mail para que possamos entrar em contato e agendar o serviço.",
+      message: "Excelente escolha! Por favor, informe seu nome e e-mail para que possamos entrar em contato e agendar o serviço. Você também pode usar nossa agenda direta: https://calendar.app.google/rkTmWwuQbDMeLtGbA",
       choices: []
     },
     enviar_proposta: {
-      message: "Vamos enviar a proposta detalhada para seu e-mail. Por favor, informe seu e-mail.",
+      message: "Vamos enviar a proposta detalhada para seu e-mail. Por favor, informe seu e-mail para receber todas as informações.",
       choices: []
     },
     formulario_afiliação: {
-      message: "Para se cadastrar, por favor, preencha o formulário no link: [link para formulário].",
+      message: "Para se cadastrar e fazer parte da nossa rede, acesse nossos links da comunidade abaixo ou agende uma consulta para orientação personalizada: https://calendar.app.google/rkTmWwuQbDMeLtGbA",
       choices: [
+        {label: "Agendar consulta para orientação", next_node: "coletar_dados_contato"},
         {label: "Voltar ao menu principal", next_node: "menu_principal"}
-      ]
+      ],
+      auto_suggestions: ["coletar_dados_contato"]
     },
     falar_atendente: {
-      message: "Por favor, informe seu nome e telefone para que um atendente entre em contato em breve.",
+      message: "Por favor, informe seu nome e telefone para que um atendente entre em contato em breve. Ou use nossa agenda direta: https://calendar.app.google/rkTmWwuQbDMeLtGbA",
       choices: []
     },
     agradecimento: {
-      message: "Obrigado pelo contato! Entraremos em contato o mais breve possível. Digite 'menu' para retornar ao início.",
+      message: "Obrigado pelo contato! Entraremos em contato o mais breve possível. Enquanto isso, explore nossos links da comunidade abaixo. Digite 'menu' para retornar ao início.",
       choices: [
         {label: "Voltar ao menu principal", next_node: "menu_principal"}
       ]
@@ -258,21 +365,60 @@ const chatEl = document.getElementById("chat");
 const choicesEl = document.getElementById("choices");
 
 let currentNode = botData.start_node;
+let interactionCount = 0;
+let hasScheduled = false;
+
+function addAutoMessage(message) {
+  const autoDiv = document.createElement("div");
+  autoDiv.className = "auto-message";
+  autoDiv.textContent = "💡 " + message;
+  chatEl.appendChild(autoDiv);
+}
+
+function sendEmail(formData) {
+  return emailjs.send("service_2dm", "template_2dm", {
+    to_email: "contatos.2dm@gmail.com",
+    from_name: formData.nome,
+    from_email: formData.email,
+    message: `Nova mensagem do Bot 2dM:\n\nNome: ${formData.nome}\nEmail: ${formData.email}\n\nOrigem: ${currentNode}`
+  });
+}
 
 function showNode(nodeKey) {
   currentNode = nodeKey;
   const node = botData.nodes[nodeKey];
+  interactionCount++;
   
   // Limpa chat e choices
   chatEl.textContent = node.message;
   choicesEl.innerHTML = "";
 
+  // Adiciona mensagens automáticas baseadas no contexto
+  if (interactionCount > 3 && !hasScheduled && nodeKey !== "coletar_dados_contato") {
+    addAutoMessage("Que tal agendar uma consulta para maximizar suas oportunidades na rede 2dM?");
+  }
+
+  if (nodeKey === "menu_principal" && interactionCount > 1) {
+    addAutoMessage("Explore nossos projetos de colaboração ou agende uma consulta estratégica!");
+  }
+
   if (node.choices && node.choices.length > 0) {
-    node.choices.forEach(choice => {
+    node.choices.forEach((choice, index) => {
       const btn = document.createElement("button");
       btn.textContent = choice.label;
       btn.className = "choice-btn";
-      btn.onclick = () => showNode(choice.next_node);
+      
+      // Destaca sugestões automáticas
+      if (node.auto_suggestions && node.auto_suggestions.includes(choice.next_node)) {
+        btn.className += " auto-suggestion";
+      }
+      
+      btn.onclick = () => {
+        if (choice.next_node === "coletar_dados_contato") {
+          hasScheduled = true;
+        }
+        showNode(choice.next_node);
+      };
       choicesEl.appendChild(btn);
     });
   } else {
@@ -280,27 +426,59 @@ function showNode(nodeKey) {
     const form = document.createElement("form");
     form.innerHTML = `
       <label>Nome:</label>
-      <input type="text" required id="nome">
+      <input type="text" required id="nome" name="nome">
       <label>Email:</label>
-      <input type="email" required id="email">
+      <input type="email" required id="email" name="email">
       <input type="submit" value="Enviar">
       <button type="button" id="cancel-btn">Cancelar</button>
     `;
     choicesEl.appendChild(form);
     
-    form.onsubmit = e => {
+    form.onsubmit = async (e) => {
       e.preventDefault();
-      chatEl.textContent = "Obrigado pelo envio! Entraremos em contato em breve.";
-      choicesEl.innerHTML = `<button class="choice-btn" onclick="showNode('menu_principal')">Voltar ao menu principal</button>`;
+      hasScheduled = true;
+      
+      const formData = {
+        nome: form.querySelector('#nome').value,
+        email: form.querySelector('#email').value
+      };
+      
+      // Mostra mensagem de carregamento
+      chatEl.innerHTML = `<div class="loading"></div> Enviando sua mensagem para contatos.2dm@gmail.com... Por favor, aguarde.`;
+      choicesEl.innerHTML = "";
+      
+      try {
+        // Simula envio de email (substitua pela implementação real)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        chatEl.textContent = "✅ Mensagem enviada com sucesso para contatos.2dm@gmail.com! Entraremos em contato em breve. Explore nossos links da comunidade abaixo enquanto aguarda.";
+        choicesEl.innerHTML = `<button class="choice-btn" onclick="showNode('menu_principal')">Voltar ao menu principal</button>`;
+      } catch (error) {
+        chatEl.textContent = "❌ Erro ao enviar mensagem. Por favor, tente novamente ou use nossa agenda direta: https://calendar.app.google/rkTmWwuQbDMeLtGbA";
+        choicesEl.innerHTML = `<button class="choice-btn" onclick="showNode('menu_principal')">Voltar ao menu principal</button>`;
+      }
     };
     
     form.querySelector("#cancel-btn").onclick = () => showNode("menu_principal");
   }
+
+  // Auto-scroll para o topo do chat
+  chatEl.scrollTop = 0;
 }
 
 // Inicializa na primeira mensagem
-window.onload = () => showNode(currentNode);
+window.onload = () => {
+  showNode(currentNode);
+  
+  // Mensagem de boas-vindas automática após 3 segundos
+  setTimeout(() => {
+    if (interactionCount === 1) {
+      addAutoMessage("Descubra como nossa rede pode potencializar seus projetos e conexões!");
+    }
+  }, 3000);
+};
 </script>
 
 </body>
 </html>
+
